@@ -53,7 +53,7 @@ var treatmentsStorage = treatments.storage(env.treatments_collection, store, pus
 var profile = require('./lib/profile')(env.profile_collection, store);
 var pumpStorage = require('./lib/pump')(env.pump_collection, store);
 var devicestatusStorage = devicestatus.storage(env.devicestatus_collection, store);
-var api = require('./lib/api/')(env, entriesStorage, settings, treatmentsStorage, pumpStorage, devicestatusStorage);
+var api = require('./lib/api/')(env, entriesStorage, settings, treatmentsStorage, devicestatusStorage);
 var pebble = require('./lib/pebble');
 ///////////////////////////////////////////////////
 
