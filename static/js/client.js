@@ -6,6 +6,7 @@
         errorCode,
         treatments,
         profile,
+        pumpRecords,
         cal,
         padding = { top: 20, right: 10, bottom: 30, left: 10 },
         opacity = {current: 1, DAY: 1, NIGHT: 0.5},
@@ -994,7 +995,12 @@
 
             profile = d[5][0];
 
-            cal = d[6][d[6].length-1];
+            pumpRecords = d[6];
+            pumpRecords.forEach(function (d) {
+                d.timestamp = new Date(d.timestamp);
+            });
+
+            cal = d[7][d[7].length-1];
 
             var temp1 = [ ];
             if (cal) {
