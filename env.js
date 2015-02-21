@@ -43,6 +43,7 @@ function config ( ) {
   env.treatments_collection = readENV('MONGO_TREATMENTS_COLLECTION', 'treatments');
   env.profile_collection = readENV('MONGO_PROFILE_COLLECTION', 'profile');
   env.devicestatus_collection = readENV('MONGO_DEVICESTATUS_COLLECTION', 'devicestatus');
+  env.pumphistory_collection = readENV('MONGO_PUMPHISTORY_COLLECTION', 'pumphistory');
 
   env.enable = readENV('ENABLE');
   env.SSL_KEY = readENV('SSL_KEY');
