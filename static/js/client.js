@@ -32,6 +32,8 @@ var app = {}, browserSettings = {}, browserStorage = $.localStorage;
         , treatments
         , profile
         , cal
+        , pumpHistory
+        , tempTreatments
         , padding = { top: 20, right: 10, bottom: 30, left: 10 }
         , opacity = {current: 1, DAY: 1, NIGHT: 0.5}
         , now = Date.now()
@@ -1383,10 +1385,63 @@ var app = {}, browserSettings = {}, browserStorage = $.localStorage;
                 if (tIOB && tIOB.activityContrib) activity += tIOB.activityContrib;
             }
         });
+
         return {
             iob: iob,
             activity: activity
         };
+    }
+
+    function calcTempTreatments() {
+        var tempHistory = [];
+        for (var i=0; i < pumpHistory.length; i++) {
+            //if(pumpHistory[i].date < time) {
+                if (pumpHistory[i]._type == "TempBasal") {
+                    var rate = pumpHistory[i].rate;
+                    var date = pumpHistory[i].date;
+                    if (i>0 && pumpHistory[i-1].date == date && pumpHistory[i-1]._type == "TempBasalDuration") {
+                        var duration = pumpHistory[i-1]['duration (min)'];
+                    } else if (i+1<pumpHistory.length && pumpHistory[i+1].date == date && pumpHistory[i+1]._type == "TempBasalDuration") {
+                        var duration = pumpHistory[i+1]['duration (min)'];
+                    } else { console.log("No duration found for "+rate+" U/hr basal"+date); }
+                    var temp = {};
+                    temp.rate = rate;
+                    temp.date = date;
+                    temp.started_at = new Date(temp.date);
+                    temp.duration = duration;
+                    tempHistory.push(temp);
+                }
+            //}
+        };
+        for (var i=0; i+1 < tempHistory.length; i++) {
+            if (tempHistory[i].date + tempHistory[i].duration*60*1000 > tempHistory[i+1].date) {
+                tempHistory[i].duration = (tempHistory[i+1].date - tempHistory[i].date)/60/1000;
+            }
+        }
+        var tempBoluses = [];
+        var tempBolusSize;
+        for (var i=0; i < tempHistory.length; i++) {
+            if (tempHistory[i].duration > 0) {
+                var netBasalRate = tempHistory[i].rate-profile.basal;
+                if (netBasalRate < 0) { tempBolusSize = -0.1; }
+                else { tempBolusSize = 0.1; }
+                var netBasalAmount = Math.round(netBasalRate*tempHistory[i].duration*10/6)/100
+                var tempBolusCount = Math.round(netBasalAmount / tempBolusSize);
+                var tempBolusSpacing = tempHistory[i].duration / tempBolusCount;
+                for (var j=0; j < tempBolusCount; j++) {
+                    var tempBolus = {};
+                    tempBolus.insulin = tempBolusSize;
+                    tempBolus.date = tempHistory[i].date + j * tempBolusSpacing*60*1000;
+                    tempBolus.created_at = new Date(tempBolus.date);
+                    tempBoluses.push(tempBolus);
+                }
+            }
+        }
+        return {
+            tempBoluses: tempBoluses,
+            tempHistory: tempHistory
+        };
+
     }
 
     function cobTotal(treatments, time) {
@@ -1695,6 +1750,10 @@ var app = {}, browserSettings = {}, browserStorage = $.localStorage;
 
                 profile = d[4][0];
                 cal = d[5][d[5].length-1];
+
+                pumpHistory = d[6];
+                tempTreatments = calcTempTreatments().tempBoluses;
+                treatments = treatments.concat(tempTreatments);
 
                 var temp1 = [ ];
                 if (cal && showRawBGs()) {
