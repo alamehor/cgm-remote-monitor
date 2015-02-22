@@ -1515,7 +1515,7 @@ var app = {}, browserSettings = {}, browserStorage = $.localStorage;
     function carbImpact(rawCarbImpact, insulinImpact) {
         var liverSensRatio = 1.0;
         var liverCarbImpactMax = 0.7;
-        var liverCarbImpact = Math.min(liverCarbImpactMax, liverSensRatio*insulinImpact);
+        var liverCarbImpact = Math.max(0,Math.min(liverCarbImpactMax, liverSensRatio*insulinImpact));
         //var liverCarbImpact = liverSensRatio*insulinImpact;
         var netCarbImpact = Math.max(0, rawCarbImpact-liverCarbImpact);
         var totalImpact = netCarbImpact - insulinImpact;
