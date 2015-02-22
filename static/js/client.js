@@ -1108,23 +1108,34 @@ var app = {}, browserSettings = {}, browserStorage = $.localStorage;
 
         var CR = treatment.CR || 20;
         var carbs = treatment.carbs || CR;
-        var insulin = treatment.insulin || 1;
+        var insulin = Math.abs(treatment.insulin) || 1;
 
-        var R1 = Math.sqrt(Math.min(carbs, insulin * CR)) / scale,
-            R2 = Math.sqrt(Math.max(carbs, insulin * CR)) / scale,
-            R3 = R2 + 8 / scale;
+        var R1 = Math.sqrt(Math.min(carbs, insulin * CR)) / scale;
+        var R2 = Math.sqrt(Math.max(carbs, insulin * CR)) / scale;
+        var R3 = R2 + 4 / scale;
 
+        var rWhite = 0, rBlue = 0;
+        if (treatment.carbs) { rWhite = R1; }
+        if (treatment.insulin < 0) { rWhite = R1; }
+        if (treatment.insulin > 0) { rBlue = R1; }
         var arc_data = [
-            { 'element': '', 'color': 'white', 'start': -1.5708, 'end': 1.5708, 'inner': 0, 'outer': R1 },
+            { 'element': '', 'color': 'white', 'start': -1.5708, 'end': 1.5708, 'inner': 0, 'outer': rWhite },
             { 'element': '', 'color': 'transparent', 'start': -1.5708, 'end': 1.5708, 'inner': R2, 'outer': R3 },
-            { 'element': '', 'color': '#0099ff', 'start': 1.5708, 'end': 4.7124, 'inner': 0, 'outer': R1 },
+            { 'element': '', 'color': '#0099ff', 'start': 1.5708, 'end': 4.7124, 'inner': 0, 'outer': rBlue },
             { 'element': '', 'color': 'transparent', 'start': 1.5708, 'end': 4.7124, 'inner': R2, 'outer': R3 }
         ];
 
         arc_data[0].outlineOnly = !treatment.carbs;
         arc_data[2].outlineOnly = !treatment.insulin;
 
+        // negative boluses should be white like carbs
+        if (treatment.insulin < 0) {
+            arc_data[0].outlineOnly = false;
+            arc_data[2].outlineOnly = true;
+        }
+
         if (treatment.carbs > 0) arc_data[1].element = Math.round(treatment.carbs) + ' g';
+        if (treatment.insulin < 0) arc_data[1].element = Math.round(treatment.insulin * 100) / 100 + ' U';
         if (treatment.insulin > 0) arc_data[3].element = Math.round(treatment.insulin * 100) / 100 + ' U';
 
         var arc = d3.svg.arc()
@@ -1165,13 +1176,15 @@ var app = {}, browserSettings = {}, browserStorage = $.localStorage;
 
 
         // labels for carbs and insulin
+        var labelColor = 'white';
+        if (rWhite == 0 && rBlue > 0) { labelColor = '#0099ff'; }
         if (showValues) {
             var label = treatmentDots.append('g')
                 .attr('class', 'path')
                 .attr('id', 'label')
-                .style('fill', 'white');
+                .style('fill', labelColor);
             label.append('text')
-                .style('font-size', 30 / scale)
+                .style('font-size', 20 / scale)
                 .style('font-family', 'Arial')
                 .style('text-shadow', '0px 0px 10px rgba(0, 0, 0, 1)')
                 .attr('text-anchor', 'middle')
