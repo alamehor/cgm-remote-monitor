@@ -1110,16 +1110,16 @@ var app = {}, browserSettings = {}, browserStorage = $.localStorage;
         var carbs = treatment.carbs || CR;
         var insulin = Math.abs(treatment.insulin) || 1;
 
-        var R1 = Math.sqrt(Math.min(carbs, insulin * CR)) / scale;
-        var R2 = Math.sqrt(Math.max(carbs, insulin * CR)) / scale;
-        var R3 = R2 + 4 / scale;
+        var R1 = Math.sqrt(Math.min(carbs, insulin * CR)+4) / scale;
+        var R2 = Math.sqrt(Math.max(carbs, insulin * CR)+4) / scale;
+        var R3 = R2 + 10 / scale;
 
         var rWhite = 0, rBlue = 0;
         if (treatment.carbs) { rWhite = R1; }
         if (treatment.insulin < 0) { rWhite = R1; }
         if (treatment.insulin > 0) { rBlue = R1; }
         var arc_data = [
-            { 'element': '', 'color': 'white', 'start': -1.5708, 'end': 1.5708, 'inner': 0, 'outer': rWhite },
+            { 'element': '', 'color': 'magenta', 'start': -1.5708, 'end': 1.5708, 'inner': 0, 'outer': rWhite },
             { 'element': '', 'color': 'transparent', 'start': -1.5708, 'end': 1.5708, 'inner': R2, 'outer': R3 },
             { 'element': '', 'color': '#0099ff', 'start': 1.5708, 'end': 4.7124, 'inner': 0, 'outer': rBlue },
             { 'element': '', 'color': 'transparent', 'start': 1.5708, 'end': 4.7124, 'inner': R2, 'outer': R3 }
@@ -1128,15 +1128,15 @@ var app = {}, browserSettings = {}, browserStorage = $.localStorage;
         arc_data[0].outlineOnly = !treatment.carbs;
         arc_data[2].outlineOnly = !treatment.insulin;
 
-        // negative boluses should be white like carbs
+        // negative boluses should be magenta like carbs
         if (treatment.insulin < 0) {
             arc_data[0].outlineOnly = false;
             arc_data[2].outlineOnly = true;
         }
 
         if (treatment.carbs > 0) arc_data[1].element = Math.round(treatment.carbs) + ' g';
-        if (treatment.insulin < 0) arc_data[1].element = Math.round(treatment.insulin * 100) / 100 + ' U';
-        if (treatment.insulin > 0) arc_data[3].element = Math.round(treatment.insulin * 100) / 100 + ' U';
+        if (treatment.insulin < -0.1) arc_data[1].element = Math.round(treatment.insulin * 100) / 100 + ' U';
+        if (treatment.insulin > 0.1) arc_data[3].element = Math.round(treatment.insulin * 100) / 100 + ' U';
 
         var arc = d3.svg.arc()
             .innerRadius(function (d) { return 5 * d.inner; })
@@ -1176,7 +1176,7 @@ var app = {}, browserSettings = {}, browserStorage = $.localStorage;
 
 
         // labels for carbs and insulin
-        var labelColor = 'white';
+        var labelColor = 'magenta';
         if (rWhite == 0 && rBlue > 0) { labelColor = '#0099ff'; }
         if (showValues) {
             var label = treatmentDots.append('g')
