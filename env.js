@@ -98,7 +98,7 @@ function setMongo() {
   env.treatments_collection = readENV('MONGO_TREATMENTS_COLLECTION', 'treatments');
   env.profile_collection = readENV('MONGO_PROFILE_COLLECTION', 'profile');
   env.devicestatus_collection = readENV('MONGO_DEVICESTATUS_COLLECTION', 'devicestatus');
-  env.pumphistory_collection = readENV('MONGO_PUMPHISTORY_COLLECTION', 'pumphistory');
+  env.pumphistory_collection = readENV('MONGO_PUMPHISTORY_COLLECTION', 'pump');
 
 
   // TODO: clean up a bit
