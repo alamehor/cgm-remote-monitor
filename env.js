@@ -98,6 +98,8 @@ function setMongo() {
   env.treatments_collection = readENV('MONGO_TREATMENTS_COLLECTION', 'treatments');
   env.profile_collection = readENV('MONGO_PROFILE_COLLECTION', 'profile');
   env.devicestatus_collection = readENV('MONGO_DEVICESTATUS_COLLECTION', 'devicestatus');
+  env.pumphistory_collection = readENV('MONGO_PUMPHISTORY_COLLECTION', 'pumphistory');
+
 
   // TODO: clean up a bit
   // Some people prefer to use a json configuration file instead.
